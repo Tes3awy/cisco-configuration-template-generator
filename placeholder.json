@@ -63,6 +63,11 @@
         }
       }
     ],
+    "mgmt_interface": {
+      "status": "Boolean",
+      "ip_addr": "String",
+      "mask": "String"
+    },
     "interfaces": [
       {
         "switch_number": "Number",
