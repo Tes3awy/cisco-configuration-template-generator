@@ -1,0 +1,194 @@
+enable
+!
+configure terminal
+!
+{% if timezone %}
+clock timezone {{ timezone }}
+{% else %}
+clock timezone UTC
+{% endif %}
+!
+{%if no_domain_lookup %}
+no ip domain lookup
+{%endif%}
+!
+hostname {{ hostname }}
+!
+{% if domain_name %}
+ip domain name {{ domain_name }}
+{% endif %}
+!
+{% if vtp.status %}
+vtp domain {{ vtp.domain_name }}
+vtp version {{ vtp.version }}
+vtp mode {{ vtp.mode }}
+{% else %}
+vtp mode transparent
+{% endif %}
+!
+{% if stp_mode %}
+spanning-tree mode {{ stp_mode }}
+{% else %}
+spanning-tree mode pvst
+{% endif %}
+!
+logging console {{ logging }}
+!
+diagnostic bootup level {{ diagnostic_level }}
+!
+{% if license_level.advantage %}
+license boot level network-advantage {% if license_level.addon %}addon dna-advantage {% endif %}
+
+!
+{% endif %}
+logging buffered {{ logging_buffer_size }}
+{% if lldp %}
+!
+lldp run
+{% endif %}
+!
+{% if crypto.status %}
+crypto key generate rsa general-keys modulus {{ crypto.key_size }}
+!
+ip ssh version {{ crypto.ssh_version }}
+{% endif %}
+!
+{% for user in users %}
+username {{ user.username }} privilege {{ user.privilege_level }} algorithm-type {{ user.algorithm_type }} secret {{ user.password }}
+{% endfor %}
+!
+{% if http_server == false %}
+no ip http server
+no ip http secure-server
+{% else %}
+ip http server
+ip http secure-server
+{% endif %}
+!
+{% if errdisable.status %}
+errdisable recovery cause {{ errdisable.recovery_cause }}
+errdisable recovery interval {{ errdisable.recovery_interval }}
+!
+{% endif %}
+banner motd $
+                #################** D I S C L A I M E R **##################
+                #                                                          #
+                #     UNAUTHORIZED ACCESS TO THIS DEVICE IS PROHIBITED     #
+                #                                                          #
+                #  Restricted to authorized individuals ONLY.              #
+                #                                                          #
+                #  You MUST have explicit, authorized permission to        #
+                #  access or configure this device.                        #
+                #                                                          #
+                #  All activities performed on this device are logged,     #
+                #  monitored, and recorded.                                #
+                #                                                          #
+                #  Unauthorized attempts and actions to access, modify     #
+                #  or use this system may result in civil and/or criminal  #
+                #  penalties.                                              #
+                #                                                          #
+                #  Disconnect IMMEDIATELY if you are not an authorized     #
+                #  user.                                                   #
+                #                                                          #
+                ############################################################
+$
+!
+{% for vlan in vlans %}
+vlan {{ vlan.id }}
+  name {{ vlan.name }}
+exit
+!
+{% endfor %}
+interface Vlan 1
+  no ip address
+  shutdown
+exit
+!
+{% for interface_vlan in interface_vlans %}
+interface Vlan {{ interface_vlan.id }}
+  ip address {{ interface_vlan.ip_addr }} {{ interface_vlan.mask }}
+  description {{ interface_vlan.name }}
+  no shutdown
+exit
+!
+{% endfor %}
+{% for etherchannel in etherchannels %}
+interface port-channel {{ etherchannel.id }}
+  {% if etherchannel.trunk %}
+  switchport mode trunk
+  description {{ etherchannel.description }}
+  {% if etherchannel.native_vlan.status %}
+  switchport trunk native vlan {{ etherchannel.native_vlan.id }}
+  {% endif %}
+  {% else %}
+  switchport mode access
+  {% endif %}
+exit
+!
+{% endfor %}
+{% for interface in interfaces %}
+interface range GigabitEthernet{{ interface.switch_number }}/{{ interface.module_number }}/{{ interface.id_range }}
+  switchport mode {{ interface.type }}
+  switchport access vlan {{ interface.access_vlan }}
+  {% if interface.voice_vlan %}
+  switchport voice vlan {{ interface.voice_vlan }}
+  {% endif %}
+  {% if interface.portfast %}
+  spanning-tree portfast
+  {% endif %}
+  {% if interface.bpduguard %}
+  spanning-tree bpduguard enable
+  {% endif %}
+  {% if interface.port_security.status %}
+  switchport port-security
+  switchport port-security mac-address sticky
+  switchport port-security maximum {{ interface.port_security.maximum }}
+  switchport port-security violation {{ interface.port_security.violation }}
+  {% endif %}
+  description {{ interface.description }}
+exit
+!
+{% endfor %}
+{% for uplink_interface in uplink_interfaces %}
+interface range TenGigabitEthernet{{ uplink_interface.switch_number }}/{{ uplink_interface.module_number }}/{{ uplink_interface.id_range }}
+  channel-group {{ uplink_interface.etherchannel.id }} mode {{ uplink_interface.etherchannel.mode }}
+  description {{ uplink_interface.description }}
+exit
+!
+{% endfor %}
+{% if snmp_server.state %}
+{% if snmp_server.enable_traps %}
+snmp-server enable traps
+{% endif %}
+{% for snmp in snmp_server.communities %}
+snmp-server community {{ snmp.community_string }} {{ snmp.capabilities }}
+{% endfor %}
+snmp-server host {{ snmp_server.snmp_host.ip_addr }} {{ snmp_server.snmp_host.community_string }}
+!
+{% endif %}
+{% for line in lines %}
+line console 0
+  {% if line.console.logging_sync %}
+  logging synchronous
+  {% endif %}
+  {% if line.console.login_local %}
+  login local
+  {% endif %}
+  exec-timeout {{ line.vty.timeout_mins }}
+  stopbits {{ line.console.stopbits }}
+exit
+!
+line vty {{ line.vty.range }}
+  {% if line.vty.logging_sync %}
+  logging synchronous
+  {% endif %}
+  {% if line.vty.login_local %}
+  login local
+  {% endif %}
+  exec-timeout {{ line.vty.timeout_mins }}
+  transport input {{ line.vty.transport.input }}
+  transport output {{ line.vty.transport.output }}
+exit
+{% endfor %}
+!
+end

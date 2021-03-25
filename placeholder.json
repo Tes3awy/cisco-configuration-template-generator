@@ -1,0 +1,135 @@
+[
+  {
+    "hostname": "String",
+    "timezone": "String",
+    "domain_name": "String",
+    "no_domain_lookup": "Boolean",
+    "logging_buffer_size": "Number",
+    "logging": "String",
+    "stp_mode": "String",
+    "vtp": {
+      "status": "Boolean",
+      "version": "Number",
+      "domain_name": "String",
+      "mode": "String"
+    },
+    "diagnostic_level": "String",
+    "license_level": {
+      "advantage": "Boolean",
+      "addon": "Boolean"
+    },
+    "http_server": "Boolean",
+    "lldp": "Boolean",
+    "users": [
+      {
+        "username": "String",
+        "privilege_level": "Number",
+        "algorithm_type": "String",
+        "password": "String"
+      }
+    ],
+    "crypto": {
+      "status": "Boolean",
+      "key_size": "Number",
+      "ssh_version": "Number"
+    },
+    "errdisable": {
+      "status": "Boolean",
+      "recovery_cause": "String",
+      "recovery_interval": "Number"
+    },
+    "vlans": [
+      {
+        "id": "Number",
+        "name": "String"
+      }
+    ],
+    "interface_vlans": [
+      {
+        "id": "Number",
+        "name": "String",
+        "ip_addr": "String",
+        "mask": "String"
+      }
+    ],
+    "etherchannels": [
+      {
+        "id": "Number",
+        "trunk": "Boolean",
+        "description": "String",
+        "native_vlan": {
+          "status": "Boolean",
+          "id": "Number"
+        }
+      }
+    ],
+    "interfaces": [
+      {
+        "switch_number": "Number",
+        "module_number": "Number",
+        "id_range": "Number or String",
+        "type": "String",
+        "description": "String",
+        "access_vlan": "Number",
+        "voice_vlan": "Number",
+        "portfast": "Boolean",
+        "bpduguard": "Boolean",
+        "port_security": {
+          "status": "Boolean",
+          "maximum": "Number",
+          "violation": "String"
+        }
+      }
+    ],
+    "uplink_interfaces": [
+      {
+        "switch_number": "Number",
+        "module_number": "Number",
+        "id_range": "Number or String",
+        "description": "String",
+        "etherchannel": {
+          "id": "Number",
+          "mode": "String"
+        }
+      }
+    ],
+    "snmp_server": {
+      "state": "Boolean",
+      "enable_traps": "Boolean",
+      "communities": [
+        {
+          "community_string": "String",
+          "capabilities": "String"
+        },
+        {
+          "community_string": "String",
+          "capabilities": "String"
+        }
+      ],
+      "snmp_host": {
+        "ip_addr": "String",
+        "community_string": "String"
+      }
+    },
+    "lines": [
+      {
+        "console": {
+          "stopbits": "Number",
+          "logging_sync": "Boolean",
+          "login_local": "Boolean",
+          "timeout": "Number"
+        },
+        "vty": {
+          "range": "Number or String",
+          "logging_sync": "Boolean",
+          "timeout": "Number",
+          "login_local": "Boolean",
+          "transport": {
+            "input": "String",
+            "output": "String"
+          }
+        }
+      }
+    ]
+  }
+]
