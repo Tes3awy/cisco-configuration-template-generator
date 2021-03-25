@@ -17,7 +17,7 @@ from time import sleep
 # Global Vars
 j2_template = "switch.j2"
 output_dir = "configs"
-params_file = "params.json"
+params_file = "placeholder.json"
 config_params = load(open(params_file))
 
 # Handle Jinja template
