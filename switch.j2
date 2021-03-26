@@ -126,7 +126,6 @@ interface port-channel {{ etherchannel.id }}
 exit
 !
 {% endfor %}
-{% if http_server %}
 interface GigabitEthernet0/0
   ip address {{ mgmt_interface.ip_addr }} {{ mgmt_interface.mask }}
   vrf forwarding Mgmt-vrf
@@ -134,7 +133,6 @@ interface GigabitEthernet0/0
   no shutdown
 exit
 !
-{% endif %}
 {% for interface in interfaces %}
 interface range GigabitEthernet{{ interface.switch_number }}/{{ interface.module_number }}/{{ interface.id_range }}
   switchport mode {{ interface.type }}
