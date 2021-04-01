@@ -20,6 +20,10 @@
     },
     "http_server": "Boolean",
     "lldp": "Boolean",
+    "enable_secret": {
+      "status": "Boolean",
+      "password": "String"
+    },
     "users": [
       {
         "username": "String",
@@ -70,6 +74,7 @@
     },
     "interfaces": [
       {
+        "interface_name": "String",
         "switch_number": "Number",
         "module_number": "Number",
         "id_range": "Number or String",
@@ -88,6 +93,7 @@
     ],
     "uplink_interfaces": [
       {
+        "interface_name": "String",
         "switch_number": "Number",
         "module_number": "Number",
         "id_range": "Number or String",

@@ -8,12 +8,11 @@ clock timezone {{ timezone }}
 clock timezone UTC
 {% endif %}
 !
+hostname {{ hostname }}
+!
 {%if no_domain_lookup %}
 no ip domain lookup
 {%endif%}
-!
-hostname {{ hostname }}
-!
 {% if domain_name %}
 ip domain name {{ domain_name }}
 {% endif %}
@@ -33,15 +32,14 @@ spanning-tree mode pvst
 {% endif %}
 !
 logging console {{ logging }}
+logging buffered {{ logging_buffer_size }}
 !
 diagnostic bootup level {{ diagnostic_level }}
 !
 {% if license_level.advantage %}
 license boot level network-advantage {% if license_level.addon %}addon dna-advantage {% endif %}
 
-!
 {% endif %}
-logging buffered {{ logging_buffer_size }}
 {% if lldp %}
 !
 lldp run
@@ -49,13 +47,15 @@ lldp run
 !
 {% if crypto.status %}
 crypto key generate rsa general-keys modulus {{ crypto.key_size }}
-!
 ip ssh version {{ crypto.ssh_version }}
 {% endif %}
 !
 {% for user in users %}
 username {{ user.username }} privilege {{ user.privilege_level }} algorithm-type {{ user.algorithm_type }} secret {{ user.password }}
 {% endfor %}
+{% if enable_secret.status %}
+enable algorithm-type scrypt secret {{ enable_secret.password }}
+{% endif %}
 !
 {% if http_server == false %}
 no ip http server
@@ -126,6 +126,7 @@ interface port-channel {{ etherchannel.id }}
 exit
 !
 {% endfor %}
+{% if mgmt_interface.status %}
 interface GigabitEthernet0/0
   ip address {{ mgmt_interface.ip_addr }} {{ mgmt_interface.mask }}
   vrf forwarding Mgmt-vrf
@@ -133,8 +134,9 @@ interface GigabitEthernet0/0
   no shutdown
 exit
 !
+{% endif %}
 {% for interface in interfaces %}
-interface range GigabitEthernet{{ interface.switch_number }}/{{ interface.module_number }}/{{ interface.id_range }}
+interface range {{ interface.interface_name }} {{ interface.switch_number }}/{{ interface.module_number }}/{{ interface.id_range }}
   switchport mode {{ interface.type }}
   switchport access vlan {{ interface.access_vlan }}
   {% if interface.voice_vlan %}
@@ -157,7 +159,7 @@ exit
 !
 {% endfor %}
 {% for uplink_interface in uplink_interfaces %}
-interface range TenGigabitEthernet{{ uplink_interface.switch_number }}/{{ uplink_interface.module_number }}/{{ uplink_interface.id_range }}
+interface range {{ uplink_interface.interface_name }} {{ uplink_interface.switch_number }}/{{ uplink_interface.module_number }}/{{ uplink_interface.id_range }}
   channel-group {{ uplink_interface.etherchannel.id }} mode {{ uplink_interface.etherchannel.mode }}
   description {{ uplink_interface.description }}
 exit
